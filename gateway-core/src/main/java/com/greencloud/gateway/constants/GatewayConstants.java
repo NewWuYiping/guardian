@@ -122,4 +122,11 @@ public class GatewayConstants {
         throw new AssertionError("Must not instantiate constant utility class");
     }
 
+
+    /**
+     * RegisterCenter
+     */
+    public static final String ROUTE_REGISTER_CENTER_SOURCE = "route.register.center.source";
+    public static final String ROUTE_REGISTER_CENTER_SERVICE_NAME = "route.register.center" +
+            ".service.name";
 }

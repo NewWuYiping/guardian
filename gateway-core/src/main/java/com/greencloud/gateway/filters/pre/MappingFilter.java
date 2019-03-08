@@ -226,6 +226,12 @@ public class MappingFilter extends GatewayFilter implements UpStreamCheckListene
         }
 
         String routeUrl = server + path + (request.getQueryString() == null ? "" : "?" + request.getQueryString());
+        if (routeUrl.indexOf("eureka") == 0){
+            routeUrl = routeUrl.replaceFirst("eureka", "http");
+            RequestContext.getCurrentContext().set(GatewayConstants.ROUTE_REGISTER_CENTER_SOURCE, "eureka");
+            RequestContext.getCurrentContext().set(GatewayConstants.ROUTE_REGISTER_CENTER_SERVICE_NAME,
+                    serverConfigRef.get().get(mappingAnt).get("serviceName"));
+        }
         RequestContext.getCurrentContext().setRouteUrl(routeUrl);
         RequestContext.getCurrentContext().setApp(getApp());
         RequestContext.getCurrentContext().setAPIIdentity(path);

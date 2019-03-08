@@ -130,7 +130,8 @@ public class StartServer implements ServletContextListener {
     }
 
     private void updateInstanceStatusToEureka() {
-        DynamicBooleanProperty eurekaEnabled = DynamicPropertyFactory.getInstance().getBooleanProperty("eureka.enabled", true);
+        DynamicBooleanProperty eurekaEnabled = DynamicPropertyFactory.getInstance().
+                getBooleanProperty("eureka.enabled", true);
         if (!eurekaEnabled.get()) {
             return;
         }
@@ -159,7 +160,25 @@ public class StartServer implements ServletContextListener {
     }
 
     private void registerEureka() {
+
+        Runnable eurekaRunnable = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    ApplicationInfoManager.getInstance()
+                            .setInstanceStatus(InstanceInfo.InstanceStatus.OUT_OF_SERVICE);
+                    Thread.sleep(500);
+                } catch (Exception e) {
+
+                } finally {
+                    registerEureka();
+                }
+            }
+        };
+
+
         DynamicBooleanProperty eurekaEnabled = DynamicPropertyFactory.getInstance().getBooleanProperty("eureka.enabled", true);
+        eurekaEnabled.addCallback(eurekaRunnable);
         if (!eurekaEnabled.get()) {
             return;
         }
@@ -168,19 +187,70 @@ public class StartServer implements ServletContextListener {
             @Override
             public String getHostName(boolean refresh) {
                 try {
-
                     return InetAddress.getLocalHost().getHostAddress();
                 } catch (UnknownHostException e) {
                     return super.getHostName(refresh);
                 }
             }
         };
-        // ConfigurationManager.getConfigInstance().setProperty("eureka.statusPageUrl","http://"+ getTurbineInstance());
+
+
+
+        DynamicStringProperty eRegion = DynamicPropertyFactory.getInstance()
+                .getStringProperty("eureka.region", "default");
+        eRegion.addCallback(eurekaRunnable);
+        ConfigurationManager.getConfigInstance().setProperty("eureka.region", eRegion.getValue());
+
+        DynamicStringProperty eName = DynamicPropertyFactory.getInstance()
+                .getStringProperty("eureka.name", "gateway");
+        ConfigurationManager.getConfigInstance().setProperty("eureka.name", eName.getValue());
+        eName.addCallback(eurekaRunnable);
+
+        DynamicStringProperty ePort = DynamicPropertyFactory.getInstance()
+                .getStringProperty("eureka.port", "gateway");
+        ConfigurationManager.getConfigInstance().setProperty("eureka.port", ePort.getValue());
+        ePort.addCallback(eurekaRunnable);
+
+        DynamicStringProperty eVipAddress = DynamicPropertyFactory.getInstance()
+                .getStringProperty("eureka.vipAddress", "gateway.ihotel.cn");
+        ConfigurationManager.getConfigInstance().setProperty("eureka.vipAddress", eVipAddress.getValue());
+        eVipAddress.addCallback(eurekaRunnable);
+
+        DynamicBooleanProperty ePreferSameZone = DynamicPropertyFactory.getInstance()
+                .getBooleanProperty("eureka.preferSameZone", false);
+        ConfigurationManager.getConfigInstance().setProperty("eureka.preferSameZone", ePreferSameZone.getValue());
+        ePreferSameZone.addCallback(eurekaRunnable);
+
+        DynamicBooleanProperty eShouldUseDns = DynamicPropertyFactory.getInstance()
+                .getBooleanProperty("eureka.shouldUseDns", false);
+        ConfigurationManager.getConfigInstance().setProperty("eureka.shouldUseDns", eShouldUseDns.getValue());
+        eShouldUseDns.addCallback(eurekaRunnable);
+
+        DynamicBooleanProperty eClientRegisterWithEureka = DynamicPropertyFactory.getInstance()
+                .getBooleanProperty("eureka.client.registerWithEureka", false);
+        ConfigurationManager.getConfigInstance().setProperty("eureka.client.registerWithEureka", eClientRegisterWithEureka.getValue());
+        eClientRegisterWithEureka.addCallback(eurekaRunnable);
+
+        DynamicBooleanProperty eClientShouldFetchRegistry = DynamicPropertyFactory.getInstance()
+                .getBooleanProperty("eureka.client.shouldFetchRegistry", true);
+        ConfigurationManager.getConfigInstance().setProperty("eureka.shouldUseDns", eClientShouldFetchRegistry.getValue());
+        eClientShouldFetchRegistry.addCallback(eurekaRunnable);
+
+        DynamicStringProperty eurekaServiceUrlDefault = DynamicPropertyFactory.getInstance()
+                .getStringProperty("eureka.serviceUrl.default", "http://localhost:8070/eureka/");
+        ConfigurationManager.getConfigInstance().setProperty("eureka.serviceUrl.default", eurekaServiceUrlDefault.getValue());
+        eurekaServiceUrlDefault.addCallback(eurekaRunnable);
+
+        DynamicBooleanProperty eDefaultAvailabilityZones = DynamicPropertyFactory.getInstance()
+                .getBooleanProperty("eureka.default.availabilityZones", true);
+        ConfigurationManager.getConfigInstance().setProperty("eureka.default.availabilityZones", eDefaultAvailabilityZones.getValue());
+        eDefaultAvailabilityZones.addCallback(eurekaRunnable);
 
         DiscoveryManager.getInstance().initComponent(eurekaInstanceConfig, new DefaultEurekaClientConfig());
 
         final DynamicStringProperty serverStatus = DynamicPropertyFactory.getInstance()
                 .getStringProperty("server." + IPUtil.getLocalIP() + ".status", "up");
+
         DiscoveryManager.getInstance().getDiscoveryClient().registerHealthCheckCallback(new HealthCheckCallback() {
             @Override
             public boolean isHealthy() {
@@ -196,11 +266,6 @@ public class StartServer implements ServletContextListener {
         metadata.put("version", version);
         metadata.put("group", group);
         metadata.put("dataCenter", dataCenter);
-
-//        String turbineInstance = getTurbineInstance();
-//        if (turbineInstance != null) {
-//            metadata.put("turbine.instance", turbineInstance);
-//        }
 
         ApplicationInfoManager.getInstance().registerAppMetadata(metadata);
     }

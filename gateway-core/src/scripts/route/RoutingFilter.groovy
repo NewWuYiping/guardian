@@ -131,6 +131,9 @@ public class RoutingFilter extends GatewayFilter {
     @Override
     public boolean shouldFilter() {
         RequestContext ctx = RequestContext.getCurrentContext();
+        if (null != ctx.get(GatewayConstants.ROUTE_REGISTER_CENTER_SOURCE)){
+            return false;
+        }
         return ctx.getRouteUrl() != null && ctx.sendGatewayResponse();
     }
 

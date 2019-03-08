@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -30,6 +31,10 @@
             <url>http://unidal.org/nexus/content/repositories/releases/</url>
         </repository>
         <repository>
+            <id>unidal.releases</id>
+            <url>http://unidal.org/nexus/content/repositories/releases/</url>
+        </repository>
+        <repository>
             <id>nexus</id>
             <url>http://183.129.215.114:8801/nexus/content/repositories/unidal.releases/</url>
         </repository>
@@ -37,8 +42,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.source.version>1.7</java.source.version>
-        <java.target.version>1.7</java.target.version>
+        <java.source.version>1.8</java.source.version>
+        <java.target.version>1.8</java.target.version>
         <java.encoding>UTF-8</java.encoding>
         <maven.compiler.version>3.8.0</maven.compiler.version>
         <maven.jacoco.version>0.8.2</maven.jacoco.version>
@@ -61,6 +66,7 @@
         <sentinel.version>1.4.0</sentinel.version>
         <junit.version>4.12</junit.version>
         <jedis.version>2.9.0</jedis.version>
+        <ribbon-version>0.3.13</ribbon-version>
     </properties>
 
     <dependencies>
@@ -72,8 +78,24 @@
         </dependency>
     </dependencies>
 
+
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>com.netflix.ribbon</groupId>
+                <artifactId>ribbon-eureka</artifactId>
+                <version>${ribbon-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.netflix.ribbon</groupId>
+                <artifactId>ribbon-httpclient</artifactId>
+                <version>${ribbon-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.netflix.ribbon</groupId>
+                <artifactId>ribbon-core</artifactId>
+                <version>${ribbon-version}</version>
+            </dependency>
             <dependency>
                 <groupId>com.greencloud</groupId>
                 <artifactId>gateway-core</artifactId>
